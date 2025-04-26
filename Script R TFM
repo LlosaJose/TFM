@@ -98,6 +98,7 @@ subset_Neuron$C26aZ <- Neuron_normS$C26a
 subset_Neuron$C26bZ <- Neuron_normS$C26b
 
 
+#DataFrame de entrenamiento y de test
 
 indexS <- sample(1:nrow(subset_Neuron), 0.7*nrow(subset_Neuron))
 train_dataS <- subset_Neuron[indexS,] #datos entrenamiento
