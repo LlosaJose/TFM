@@ -1,0 +1,337 @@
+
+
+install.packages("NeuralNetTools")
+install.packages("randomForest")
+install.packages("caret")
+install.packages("rpart.plot")
+install.packages("rmarkdown")
+
+library(foreign)
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(nnet)
+library(readxl)
+library(NeuralNetTools)
+library(randomForest)
+library(caret)
+library(rpart.plot)
+library(pROC)
+library(rmarkdown)
+
+
+##Abrir data frame Excel
+##Explorar ruta archivo
+
+file.choose()
+
+
+
+##Abrir un Excel (Foessa balanceado de suicidio)
+
+
+setwd('G:\\Mi unidad\\FORMACIÓN - UNIVERSIDAD\\Máster TISA 24-25\\TFM\\Análisis\\Cuantitativo\\')
+
+
+Neuron <-read_excel("FoessaBBDDtfm.xlsx")
+
+
+
+str(Neuron)
+
+head(Neuron)
+
+
+
+
+
+
+
+#Cambiar escala a las columnas (en el ej se crean factores)
+
+
+cols<-c("Id_Suic", "dim1","dim2","dim3","dim4","dim5","dim6","dim7","dim8", "A2", "edad4", "edad6", "C24_OT_14", "C26a", "c26b", "c22")
+Neuron[cols] <- lapply(Neuron[cols], as.factor)
+sapply(Neuron, class)
+
+#Cambiar Nombre Var
+
+names(Neuron)[names(Neuron) == "tamañofamilia"] <- "tamanofamilia"
+names(Neuron)
+
+#Normalizar datos de variables
+normalize <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+
+Neuron_norm <- as.data.frame(lapply(Neuron[, c("A1", "tamanofamilia")], normalize))
+
+Neuron$A1z <- Neuron_norm$A1
+Neuron$tamanofamiliaZ <- Neuron_norm$tamanofamilia
+
+
+
+#---------------------
+#-------------------
+
+# Subset sin #NA
+subset_Neuron <- Neuron[Neuron$C26a %in% c(1, 2, 3) & Neuron$C26b %in% c(1, 2, 3, 4), ]
+
+
+
+
+
+colsS<-c("C26a", "C26b")
+subset_Neuron[colsS] <- lapply(subset_Neuron[colsS], as.factor)
+sapply(subset_Neuron, class)
+
+
+
+
+
+
+#Submuestreo 100% de la clase 1 suicidio y 25% de la clase 0 no suicidio
+
+# Supongamos que tu dataset se llama "train_data" y la columna de la variable dependiente es "y".
+
+# 1. Separar las clases
+clase_0 <- subset_Neuron %>% filter(Id_Suic == 0)
+clase_1 <- subset_Neuron %>% filter(Id_Suic == 1)
+
+# 2. Submuestrear el 25% de la clase 0
+set.seed(123)  # Para que el muestreo sea reproducible
+clase_0_submuestreada <- clase_0 %>% sample_frac(size = 0.35)
+
+# 3. Unir los datos seleccionados
+Neuron_Balance <- bind_rows(clase_1, clase_0_submuestreada)
+
+summary(Neuron_Balance$Id_Suic)
+
+# 4. (opcional) Mezclar el dataset
+Neuron_Balance <- Neuron_Balance %>% sample_frac(1)
+
+
+#DataFrame de entrenamiento y de test
+set.seed(123) #Permite replicar la muestra
+
+indexS <- sample(1:nrow(Neuron_Balance), 0.8*nrow(Neuron_Balance))
+train_dataS <- Neuron_Balance[indexS,] #datos entrenamiento
+test_dataS <- Neuron_Balance[-indexS,] #datos prueba
+
+sapply(train_dataS$C22, class)
+
+#--------------------------
+
+#1.Análisis Red Neuronal con las dim
+
+
+
+#1.1.Red neuronal (1 capa oculta con 5 neuronas, class -> prob .5)
+
+modelo_nn_class <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8,
+                        data = train_dataS,
+                        size = 5,
+                        linout = FALSE,
+                        decay = 0.01,
+                        maxit = 200)
+
+
+summary(modelo_nn_class)
+garson(modelo_nn_class)
+
+#Predicciones
+prob_class <- predict(modelo_nn_class, test_dataS, type = "class")
+
+
+
+# Evaluación con matriz de confusión
+
+confusion_matrix_nn_class <- table(Predicciones = prob_class, Reales = test_dataS$Id_Suic)
+
+print(confusion_matrix_nn_class)
+
+
+#Cálculo de la precisión (accuracy)
+
+accuracy_nn_class <- sum(diag(confusion_matrix_nn_class))/sum(confusion_matrix_nn_class)
+accuracy_nn_class
+
+
+
+
+#1.2. Red neuronal (1 capa oculta con 5 neuronas, raw -> prob .27) Con las DIM de nuevo
+
+modelo_nn <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8,
+                  data = train_dataS,
+                  size = 5,
+                  linout = FALSE,
+                  decay = 0.01,
+                  maxit = 200)
+
+
+summary(modelo_nn)
+
+garson(modelo_nn)
+
+#Predicciones
+prob <- predict(modelo_nn, test_dataS, type = "raw")
+
+nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .2, en lugar de .5.
+
+pred_nn <- ifelse(prob > nuevo_umbral, 1, 0)
+
+# Evaluación con matriz de confusión
+
+confusion_matrix_nn <- table(Predicciones = pred_nn, Reales = test_dataS$Id_Suic)
+
+print(confusion_matrix_nn)
+
+
+#Cálculo de la precisión (accuracy)
+
+accuracy_nn <- sum(diag(confusion_matrix_nn))/sum(confusion_matrix_nn)
+accuracy_nn
+
+
+
+
+
+
+# Definir los predictores y la variable de respuesta
+X <- Neuron_Balance[, c("dim2", "dim5", "dim6", "dim7", "dim8")]
+y <- Neuron_Balance$Id_Suic
+
+# Dividir en datos de entrenamiento y prueba
+set.seed(123)
+
+train_index <- sample(1:nrow(Neuron_Balance), size = 0.7 * nrow(Neuron_Balance))
+X_train <- X[train_index, ]
+y_train <- y[train_index]
+X_test <- X[-train_index, ]
+y_test <- y[-train_index]
+
+
+
+# Generar la predicción de probabilidades (no solo las clases)
+probabilidades <- predict(modelo_nn, X_test, type = "raw")
+
+# Crear la curva ROC
+roc_curve <- roc(y_test, probabilidades)
+plot(roc_curve, main = "Curva ROC")
+
+# AUC
+auc_value <- auc(roc_curve)
+print(paste("AUC: ", round(auc_value, 2)))
+
+
+
+#2.1. Análisis con las DIM y Salud Mental
+
+
+
+#Red neuronal (1 capa oculta con 5 neuronas, raw -> prob .2): Dimensiones + Salud Mental
+
+modelo_nn_comS <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C22 + C26b + A2 + A1z,
+                       data = train_dataS,
+                       size = 5,
+                       linout = FALSE,
+                       decay = 0.01,
+                       maxit = 200)
+
+
+summary(modelo_nn_comS)
+
+garson(modelo_nn_comS)
+
+#Predicciones
+prob_ComS <- predict(modelo_nn_comS, test_dataS, type = "raw")
+
+nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .3, en lugar de .5.
+
+pred_nn_comS <- ifelse(prob_ComS > nuevo_umbral, 1, 0)
+
+# Evaluación con matriz de confusión
+
+confusion_matrix_nn_comS <- table(Predicciones = pred_nn_comS, Reales = test_dataS$Id_Suic)
+
+print(confusion_matrix_nn_comS)
+
+
+#Cálculo de la precisión (accuracy)
+
+accuracy_nn_comS <- sum(diag(confusion_matrix_nn_comS))/sum(confusion_matrix_nn_comS)
+accuracy_nn_comS
+
+
+
+
+
+# Definir los predictores y la variable de respuesta
+X <- Neuron_Balance[, c("dim2", "dim5", "dim6", "dim7", "dim8", "C22", "A2", "A1z", "C26b")]
+y <- Neuron_Balance$Id_Suic
+
+# Dividir en datos de entrenamiento y prueba
+set.seed(123)
+
+train_index <- sample(1:nrow(Neuron_Balance), size = 0.7 * nrow(Neuron_Balance))
+X_train <- X[train_index, ]
+y_train <- y[train_index]
+X_test <- X[-train_index, ]
+y_test <- y[-train_index]
+
+
+
+# Generar la predicción de probabilidades (no solo las clases)
+probabilidades <- predict(modelo_nn, X_test, type = "raw")
+
+# Crear la curva ROC
+roc_curve <- roc(y_test, probabilidades)
+plot(roc_curve, main = "Curva ROC")
+
+# AUC
+auc_value <- auc(roc_curve)
+print(paste("AUC: ", round(auc_value, 2)))
+
+
+umbral_optimo <- coords(roc_curve, "best", ret = "threshold")
+print(umbral_optimo)
+
+
+
+#3.RANDOM FOREST
+
+
+modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
+                          data = Neuron_Balance, ntree = 500, importance = TRUE)
+print(modelo_rf)
+varImpPlot(modelo_rf)
+
+
+probabilidades_rf <- predict(modelo_rf, Neuron_Balance, type = "prob")
+
+umbral <- 0.27
+
+predicciones_umbral <- ifelse(probabilidades_rf[, "1"] > umbral, "1", "0")
+confusionMatrix(factor(predicciones_umbral), factor(Neuron_Balance$Id_Suic))
+
+
+importance(modelo_rf)
+varImpPlot(modelo_rf)
+
+plot(varImp_modelo, main = "Importancia de las Variables en Random Forest")
+
+
+#Representación Gráfica arbol de ejemplo
+
+arbol_1 <- getTree(modelo_rf, k = 1, labelVar = TRUE)
+
+arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
+                     data = Neuron_Balance, method = "class", control = rpart.control(cp = 0))
+
+
+rpart.plot(arbol_rpart, 
+           main = "Árbol 1 de Random Forest",   # Título del gráfico
+           cex.main = 1.5,                        # Tamaño del título
+           cex = .75)                           # Tamaño de las etiquetas de los nodos
+
+
