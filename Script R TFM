@@ -76,9 +76,7 @@ Neuron$c22Z <- Neuron_norm$C22
 subset_Neuron <- Neuron[Neuron$C26b %in% c(1, 2, 3, 4), ]
 
 
-#Dividimos el conjunto de datos en entrenamiento (70%) y prueba (30%)
 
-set.seed(123) #Permite replicar la muestra
 
 
 colsS<-c("C26a", "C26b")
@@ -99,6 +97,7 @@ subset_Neuron$C26bZ <- Neuron_normS$C26b
 
 
 #DataFrame de entrenamiento y de test
+set.seed(123) #Permite replicar la muestra
 
 indexS <- sample(1:nrow(subset_Neuron), 0.7*nrow(subset_Neuron))
 train_dataS <- subset_Neuron[indexS,] #datos entrenamiento
@@ -175,6 +174,7 @@ print(confusion_matrix_nn)
 
 accuracy_nn <- sum(diag(confusion_matrix_nn))/sum(confusion_matrix_nn)
 accuracy_nn
+
 
 
 
@@ -284,7 +284,7 @@ print(umbral_optimo)
 #3.RANDOM FOREST
 
 
-modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + c22Z, 
+modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + A2 + A1z, 
                           data = subset_Neuron, ntree = 500, importance = TRUE)
 print(modelo_rf)
 varImpPlot(modelo_rf)
@@ -292,7 +292,7 @@ varImpPlot(modelo_rf)
 
 probabilidades_rf <- predict(modelo_rf, subset_Neuron, type = "prob")
 
-umbral <- 0.2
+umbral <- 0.20
 
 predicciones_umbral <- ifelse(probabilidades_rf[, "1"] > umbral, "1", "0")
 confusionMatrix(factor(predicciones_umbral), factor(subset_Neuron$Id_Suic))
@@ -308,8 +308,86 @@ varImpPlot(modelo_rf)
 
 arbol_1 <- getTree(modelo_rf, k = 1, labelVar = TRUE)
 
-arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + c22Z, 
+arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + c22Z + A2+ A1z, 
                      data = subset_Neuron, method = "class", control = rpart.control(cp = 0))
 
 rpart.plot(arbol_rpart, main = "Árbol 1 de Random Forest")
 
+
+
+#4. RANDOM FOREST 
+
+
+
+modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + A2 + A1z, 
+                          data = subset_Neuron, ntree = 500, importance = TRUE)
+print(modelo_rf)
+varImpPlot(modelo_rf)
+
+
+probabilidades_rf <- predict(modelo_rf, subset_Neuron, type = "prob")
+
+umbral <- 0.20
+
+predicciones_umbral <- ifelse(probabilidades_rf[, "1"] > umbral, "1", "0")
+confusionMatrix(factor(predicciones_umbral), factor(subset_Neuron$Id_Suic))
+
+
+importance(modelo_rf)
+varImpPlot(modelo_rf)
+
+
+
+
+#Representación Gráfica arbol de ejemplo
+
+arbol_1 <- getTree(modelo_rf, k = 1, labelVar = TRUE)
+
+arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + c22Z + A2 + A1z, 
+                     data = subset_Neuron, method = "class", control = rpart.control(cp = 0))
+
+rpart.plot(arbol_rpart, main = "Árbol 1 de Random Forest")
+
+
+
+
+##4.1 Modelo Random Forest Optimizado
+
+##Control de entrenamiento
+control <- trainControl(method = "cv", number = 5)
+
+
+
+# Definir grilla de parámetros
+tunegrid <- expand.grid(
+  .mtry = c(2, 4, 6, 8, 10)  # probar varios valores de mtry
+)
+
+# Ajustar el modelo
+set.seed(123)  # Semilla para reproducibilidad
+modelo_rf_opt <- train(
+  Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26bZ + c22Z + A2 + A1z, 
+  data = subset_Neuron,
+  method = "rf",
+  metric = "Accuracy",
+  tuneGrid = tunegrid,
+  trControl = control,
+  ntree = 500
+)
+
+
+print(modelo_rf_opt)
+plot(modelo_rf_opt)
+
+
+
+probabilidades_rf_opt <- predict(modelo_rf_opt, subset_Neuron, type = "prob")
+
+umbral <- 0.20
+
+predicciones_umbral_opt <- ifelse(probabilidades_rf_opt[, "1"] > umbral, "1", "0")
+confusionMatrix(factor(predicciones_umbral_opt), factor(subset_Neuron$Id_Suic))
+
+
+varImp_modelo <- varImp(modelo_rf_opt, scale = FALSE)
+plot(varImp_modelo, main = "Importancia de las Variables en Random Forest Optimizado")
