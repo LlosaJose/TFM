@@ -335,3 +335,14 @@ rpart.plot(arbol_rpart,
            cex = .75)                           # Tamaño de las etiquetas de los nodos
 
 
+
+
+#EXPROTAR DATAFRAMES CREADOS
+library(writexl)
+write_xlsx(Neuron_Balance, "Neuron_Balance.xlsx")
+write_xlsx(test_dataS, "test_dataS.xlsx")
+write_xlsx(train_dataS, "train_dataS.xlsx")
+
+
+
+
