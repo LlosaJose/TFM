@@ -1,0 +1,375 @@
+#######1.Análisis Red Neuronal con las dim
+> 
+> 
+> 
+#######1.1.Red neuronal (1 capa oculta con 5 neuronas, class -> prob .5)
+En primer lugar, y de acuerdo a los resultados de la regresión logística
+binaria en la que la VD era la ideación de suicidio 0,1, se trabaja un
+modelo de red neuronal con una capa oculta y size 0 de curva sigmoidal.
+Todas las variables, tanto VI como VD, son factores dicotómicos. La VI
+son las dimensiones significativas de la regresión, dim2; dim5; dim6;
+dim7; dim8, y la VD la variable de ideación suicida dicotomizada. El
+umbral está en la probabilidad 0,5 para predecir la VD, por lo que es un
+modelo “class”.
+
+Los resultados muestran una baja sensibilidad:
+
+
+
+
+> modelo_nn_class <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8,
++                         data = train_dataS,
++                         size = 5,
++                         linout = FALSE,
++                         decay = 0.01,
++                         maxit = 200)
+# weights:  36
+initial  value 1106.312548 
+iter  10 value 842.858814
+iter  20 value 832.764138
+iter  30 value 831.119584
+iter  40 value 829.985261
+iter  50 value 829.258380
+iter  60 value 828.757364
+iter  70 value 828.357092
+iter  80 value 828.024683
+iter  90 value 827.668693
+iter 100 value 827.525378
+iter 110 value 827.446120
+iter 120 value 827.422908
+iter 130 value 827.304064
+iter 140 value 827.071585
+iter 150 value 826.940984
+iter 160 value 826.904881
+iter 170 value 826.865848
+iter 180 value 826.832008
+iter 190 value 826.824352
+iter 200 value 826.823483
+final  value 826.823483 
+stopped after 200 iterations
+> 
+> 
+> summary(modelo_nn_class)
+a 5-5-1 network with 36 weights
+options were - entropy fitting  decay=0.01
+ b->h1 i1->h1 i2->h1 i3->h1 i4->h1 i5->h1 
+ -2.21   2.88   2.04  -0.88  -3.55  -2.46 
+ b->h2 i1->h2 i2->h2 i3->h2 i4->h2 i5->h2 
+ -2.92   3.79  -0.10  -0.71   3.15  -1.39 
+ b->h3 i1->h3 i2->h3 i3->h3 i4->h3 i5->h3 
+ -1.96   0.86  -2.08   2.45   1.69   0.67 
+ b->h4 i1->h4 i2->h4 i3->h4 i4->h4 i5->h4 
+  0.07  -1.76  -3.30   0.52  -2.10  -0.93 
+ b->h5 i1->h5 i2->h5 i3->h5 i4->h5 i5->h5 
+ -2.84   4.30   1.72  -1.98   1.64  -2.63 
+ b->o h1->o h2->o h3->o h4->o h5->o 
+ 0.51 -4.31 -4.08  3.17 -3.92  5.16 
+> garson(modelo_nn_class) #GRAFICO1
+> 
+> #Predicciones
+> prob_class <- predict(modelo_nn_class, test_dataS, type = "class")
+> 
+> 
+> 
+> # Evaluación con matriz de confusión
+> 
+> confusion_matrix_nn_class <- table(Predicciones = prob_class, Reales = test_dataS$Id_Suic)
+> 
+> print(confusion_matrix_nn_class)
+            Reales
+Predicciones   0   1
+           0 232  67
+           1  23  60
+> 
+> 
+> #Cálculo de la precisión (accuracy)
+> 
+> accuracy_nn_class <- sum(diag(confusion_matrix_nn_class))/sum(confusion_matrix_nn_class)
+> accuracy_nn_class
+[1] 0.7643979
+> 
+
+
+
+
+
+###########1.2. Red neuronal (1 capa oculta con 5 neuronas, raw -> prob .27) Con las DIM de nuevo
+
+Se replica el análisis, pero se pasa de modelo "class" a modelo "row",
+con la finalidad de poder determinar un umbral de probabilidad diferente
+al .5. Por medio de estimaciones con curva de Roc se determina el .27
+como el adecuado para estos datos. En el primer análisis con las DIM el
+modelo tiene una acuracy global peor: .63, pero una capacidad mucho
+mayor para detectar riesgo de ideación suicida, como se observa en los
+resultados.
+
+
+
+> modelo_nn <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8,
++                   data = train_dataS,
++                   size = 5,
++                   linout = FALSE,
++                   decay = 0.01,
++                   maxit = 200)
+# weights:  36
+initial  value 1015.350033 
+iter  10 value 837.515233
+iter  20 value 831.333774
+iter  30 value 831.016248
+iter  40 value 830.757319
+iter  50 value 830.001555
+iter  60 value 828.728467
+iter  70 value 828.332291
+iter  80 value 828.045133
+iter  90 value 827.647255
+iter 100 value 827.492072
+iter 110 value 827.444859
+iter 120 value 827.421707
+iter 130 value 827.416586
+iter 140 value 827.415188
+iter 150 value 827.412890
+iter 160 value 827.408330
+iter 170 value 827.208064
+iter 180 value 827.068817
+iter 190 value 827.019599
+iter 200 value 827.002193
+final  value 827.002193 
+stopped after 200 iterations
+> 
+> 
+> summary(modelo_nn)
+a 5-5-1 network with 36 weights
+options were - entropy fitting  decay=0.01
+ b->h1 i1->h1 i2->h1 i3->h1 i4->h1 i5->h1 
+  1.42  -1.32   2.60  -2.91  -0.65  -0.83 
+ b->h2 i1->h2 i2->h2 i3->h2 i4->h2 i5->h2 
+ -1.79   2.72   1.51  -0.77  -2.45  -3.65 
+ b->h3 i1->h3 i2->h3 i3->h3 i4->h3 i5->h3 
+ -1.47   2.89   2.70   0.55   0.81   2.83 
+ b->h4 i1->h4 i2->h4 i3->h4 i4->h4 i5->h4 
+  2.66  -2.60   2.36  -1.26   1.27  -1.63 
+ b->h5 i1->h5 i2->h5 i3->h5 i4->h5 i5->h5 
+ -0.34  -2.09  -0.71   2.28  -0.07   3.03 
+ b->o h1->o h2->o h3->o h4->o h5->o 
+-0.13 -3.61 -4.49  3.88  2.93 -3.04 
+> 
+> garson(modelo_nn) #GRAFICO2
+> 
+> #Predicciones
+> prob <- predict(modelo_nn, test_dataS, type = "raw")
+> 
+> nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .2, en lugar de .5.
+> 
+> pred_nn <- ifelse(prob > nuevo_umbral, 1, 0)
+> 
+> # Evaluación con matriz de confusión
+> 
+> confusion_matrix_nn <- table(Predicciones = pred_nn, Reales = test_dataS$Id_Suic)
+> 
+> print(confusion_matrix_nn)
+            Reales
+Predicciones   0   1
+           0 146  29
+           1 109  98
+> 
+> 
+> #Cálculo de la precisión (accuracy)
+> 
+> accuracy_nn <- sum(diag(confusion_matrix_nn))/sum(confusion_matrix_nn)
+> accuracy_nn
+[1] 0.6387435
+
+
+
+
+#########2.1. Análisis con las DIM y Salud Mental
+Avanzando en un modelo biopsicosocial completamente integrado, se
+experimenta con un segundo modelo en el que se continúan incluyendo las
+variables DIM, que ya hemos visto que son relevantes, junto con
+variables sociodemográficas que en el descriptivo funcionan y no reducen
+la muestra por suponer un filtro (sexo A1 y edad tipificada A2z).
+También, y esto es lo importante, se incluyen dos variables de situación
+de salud mental. Una de percepción de estado de salud mental (C22) y
+otra sobre trastorno detectado en los últimos meses / año (C26b).
+
+El modelo es mucho mejor en la sensibilidad de clasificar casos de
+riesgo de ideación suicida. Sitúa prioritariamente a las variables de
+salud mental, pero también da importancia a las dimensiones de
+exclusión. Una propuesta biopsicosocial. Sin embargo, se considera que
+puede ganar en especificidad. Se mantiene el .27 como umbral.
+
+A este respecto, modelos de machine learning a través de Random Forest
+pueden ser de mayor utilidad para VD de tipo dicotómico, como este caso: 
+> 
+> 
+> #Red neuronal (1 capa oculta con 5 neuronas, raw -> prob .2): Dimensiones + Salud Mental
+> 
+> modelo_nn_comS <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C22 + C26b + A2 + A1z,
++                        data = train_dataS,
++                        size = 5,
++                        linout = FALSE,
++                        decay = 0.01,
++                        maxit = 200)
+# weights:  66
+initial  value 1270.464789 
+iter  10 value 696.482222
+iter  20 value 679.070150
+iter  30 value 667.025617
+iter  40 value 652.434499
+iter  50 value 644.901099
+iter  60 value 643.622093
+iter  70 value 641.665386
+iter  80 value 639.022796
+iter  90 value 638.258672
+iter 100 value 637.964496
+iter 110 value 637.770829
+iter 120 value 637.746847
+final  value 637.745831 
+converged
+> 
+> 
+> summary(modelo_nn_comS)
+a 11-5-1 network with 66 weights
+options were - entropy fitting  decay=0.01
+  b->h1  i1->h1  i2->h1  i3->h1  i4->h1  i5->h1  i6->h1  i7->h1  i8->h1  i9->h1 i10->h1 
+  -1.52    1.84   -3.19   -0.67    4.06    3.32    4.18    1.46    1.09    0.72   -2.68 
+i11->h1 
+   6.20 
+  b->h2  i1->h2  i2->h2  i3->h2  i4->h2  i5->h2  i6->h2  i7->h2  i8->h2  i9->h2 i10->h2 
+   5.40   -6.06    4.45    2.78   -7.20    5.25    1.74   -3.63   -0.51    2.34   -4.12 
+i11->h2 
+   0.10 
+  b->h3  i1->h3  i2->h3  i3->h3  i4->h3  i5->h3  i6->h3  i7->h3  i8->h3  i9->h3 i10->h3 
+  -2.11    2.85   -2.69    1.15    0.82    1.87    1.01    0.79   -0.60    4.35    0.10 
+i11->h3 
+  -1.13 
+  b->h4  i1->h4  i2->h4  i3->h4  i4->h4  i5->h4  i6->h4  i7->h4  i8->h4  i9->h4 i10->h4 
+  -0.46    1.07   -0.55    0.34    6.62    3.54   -0.85   -2.65   -0.31    4.67    0.10 
+i11->h4 
+  -3.36 
+  b->h5  i1->h5  i2->h5  i3->h5  i4->h5  i5->h5  i6->h5  i7->h5  i8->h5  i9->h5 i10->h5 
+  -0.71    2.84   -2.46    2.06   -1.48    2.08    0.52    2.08    1.87    6.74   -0.19 
+i11->h5 
+  -2.08 
+ b->o h1->o h2->o h3->o h4->o h5->o 
+-0.19  8.22 -7.32 -8.37  3.54  6.36 
+> 
+> garson(modelo_nn_comS) #GRAFICO3
+> 
+> #Predicciones
+> prob_ComS <- predict(modelo_nn_comS, test_dataS, type = "raw")
+> 
+> nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .3, en lugar de .5.
+> 
+> pred_nn_comS <- ifelse(prob_ComS > nuevo_umbral, 1, 0)
+> 
+> # Evaluación con matriz de confusión
+> 
+> confusion_matrix_nn_comS <- table(Predicciones = pred_nn_comS, Reales = test_dataS$Id_Suic)
+> 
+> print(confusion_matrix_nn_comS)
+            Reales
+Predicciones   0   1
+           0 183  21
+           1  72 106
+> 
+> 
+> #Cálculo de la precisión (accuracy)
+> 
+> accuracy_nn_comS <- sum(diag(confusion_matrix_nn_comS))/sum(confusion_matrix_nn_comS)
+> accuracy_nn_comS
+[1] 0.7565445
+
+
+
+
+
+
+
+#############3.RANDOM FOREST
+
+Se pone a prueba el mismo modelo, con variables de salud mental y
+variables DIM en un Random Forest. El umbral se vuelve a fijar en .27,
+como se estimó con la curva ROC. Se observa que la calidad "Accuracy" es
+mucho mayor, con una buena sensibilidad y buena especificidad. Este
+modelo es razonablemente adecuado para detectar casos de riesgo de
+ideación suicida.
+
+> 
+> modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
++                           data = Neuron_Balance, ntree = 500, importance = TRUE)
+> print(modelo_rf)
+
+Call:
+ randomForest(formula = Id_Suic ~ dim2 + dim5 + dim6 + dim7 +      dim8 + C26b + C22 + A2 + A1z, data = Neuron_Balance, ntree = 500,      importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 20.16%
+Confusion matrix:
+     0   1 class.error
+0 1035 156   0.1309824
+1  229 490   0.3184979
+> varImpPlot(modelo_rf) #GRAFICO4
+> 
+> 
+> probabilidades_rf <- predict(modelo_rf, Neuron_Balance, type = "prob")
+> 
+> umbral <- 0.27
+> 
+> predicciones_umbral <- ifelse(probabilidades_rf[, "1"] > umbral, "1", "0")
+> confusionMatrix(factor(predicciones_umbral), factor(Neuron_Balance$Id_Suic))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    0    1
+         0 1034  111
+         1  157  608
+                                         
+               Accuracy : 0.8597         
+                 95% CI : (0.8433, 0.875)
+    No Information Rate : 0.6236         
+    P-Value [Acc > NIR] : < 2.2e-16      
+                                         
+                  Kappa : 0.7049         
+                                         
+ Mcnemar's Test P-Value : 0.005981       
+                                         
+            Sensitivity : 0.8682         
+            Specificity : 0.8456         
+         Pos Pred Value : 0.9031         
+         Neg Pred Value : 0.7948         
+             Prevalence : 0.6236         
+         Detection Rate : 0.5414         
+   Detection Prevalence : 0.5995         
+      Balanced Accuracy : 0.8569         
+                                         
+       'Positive' Class : 0              
+                                         
+> 
+> 
+> importance(modelo_rf)
+             0         1 MeanDecreaseAccuracy MeanDecreaseGini
+dim2 12.006273  2.515870            10.953214         17.84299
+dim5 18.486349 -2.496599            13.463765         21.53429
+dim6 15.298754  7.725720            17.918156         28.40528
+dim7 42.437181 24.411987            48.066832         65.37655
+dim8 22.433056 -2.533807            17.037162         27.23378
+C26b 54.753614 47.758304            68.906466        164.13480
+C22  42.482183 19.966984            45.487274        125.73865
+A2   -2.851706  4.590326             1.723405         18.00260
+A1z   4.249514 10.547919            10.746536        134.36385
+> varImpPlot(modelo_rf)
+> 
+> plot(varImp_modelo, main = "Importancia de las Variables en Random Forest") #GRAFICO5 
+> 
+> 
+> #Representación Gráfica arbol de ejemplo #GRAFICO6
+> 
+> arbol_1 <- getTree(modelo_rf, k = 1, labelVar = TRUE)
+> 
+> arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
++                      data = Neuron_Balance, method = "class", control = rpart.control(cp = 0))
+> 
+> rpart.plot(arbol_rpart, main = "Árbol 1 de Random Forest")
