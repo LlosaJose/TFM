@@ -12,6 +12,8 @@ dim7; dim8, y la VD la variable de ideación suicida dicotomizada. El
 umbral está en la probabilidad 0,5 para predecir la VD, por lo que es un
 modelo “class”.
 
+#Gráfico 1
+
 Los resultados muestran una baja sensibilidad:
 
 
@@ -24,69 +26,56 @@ Los resultados muestran una baja sensibilidad:
 +                         decay = 0.01,
 +                         maxit = 200)
 # weights:  36
-initial  value 1106.312548 
-iter  10 value 842.858814
-iter  20 value 832.764138
-iter  30 value 831.119584
-iter  40 value 829.985261
-iter  50 value 829.258380
-iter  60 value 828.757364
-iter  70 value 828.357092
-iter  80 value 828.024683
-iter  90 value 827.668693
-iter 100 value 827.525378
-iter 110 value 827.446120
-iter 120 value 827.422908
-iter 130 value 827.304064
-iter 140 value 827.071585
-iter 150 value 826.940984
-iter 160 value 826.904881
-iter 170 value 826.865848
-iter 180 value 826.832008
-iter 190 value 826.824352
-iter 200 value 826.823483
-final  value 826.823483 
+initial  value 920.562572 
+iter  10 value 740.562878
+iter  20 value 730.557062
+iter  30 value 727.980518
+iter  40 value 727.289030
+iter  50 value 726.948561
+iter  60 value 726.771011
+iter  70 value 726.682426
+iter  80 value 726.662129
+iter  90 value 726.640947
+iter 100 value 726.623066
+iter 110 value 726.609365
+iter 120 value 726.568730
+iter 130 value 726.470208
+iter 140 value 726.358862
+iter 150 value 726.323927
+iter 160 value 726.298782
+iter 170 value 726.228974
+iter 180 value 726.111085
+iter 190 value 725.944430
+iter 200 value 725.898249
+final  value 725.898249 
 stopped after 200 iterations
-> 
-> 
 > summary(modelo_nn_class)
 a 5-5-1 network with 36 weights
 options were - entropy fitting  decay=0.01
  b->h1 i1->h1 i2->h1 i3->h1 i4->h1 i5->h1 
- -2.21   2.88   2.04  -0.88  -3.55  -2.46 
+ -1.48   3.98   2.42  -2.28   0.67  -2.45 
  b->h2 i1->h2 i2->h2 i3->h2 i4->h2 i5->h2 
- -2.92   3.79  -0.10  -0.71   3.15  -1.39 
+ -1.51   4.51   1.59  -1.95   3.03  -2.28 
  b->h3 i1->h3 i2->h3 i3->h3 i4->h3 i5->h3 
- -1.96   0.86  -2.08   2.45   1.69   0.67 
+  3.02  -2.58  -2.56   0.72   1.61   1.29 
  b->h4 i1->h4 i2->h4 i3->h4 i4->h4 i5->h4 
-  0.07  -1.76  -3.30   0.52  -2.10  -0.93 
+ -0.85  -0.48  -1.90   2.41   1.74   0.21 
  b->h5 i1->h5 i2->h5 i3->h5 i4->h5 i5->h5 
- -2.84   4.30   1.72  -1.98   1.64  -2.63 
+  2.00  -1.21  -1.44  -0.50  -3.13  -1.90 
  b->o h1->o h2->o h3->o h4->o h5->o 
- 0.51 -4.31 -4.08  3.17 -3.92  5.16 
-> garson(modelo_nn_class) #GRAFICO1
-> 
+-2.73  5.73 -3.65  3.53  2.26 -3.61 
+> garson(modelo_nn_class)
 > #Predicciones
 > prob_class <- predict(modelo_nn_class, test_dataS, type = "class")
-> 
-> 
-> 
-> # Evaluación con matriz de confusión
-> 
 > confusion_matrix_nn_class <- table(Predicciones = prob_class, Reales = test_dataS$Id_Suic)
-> 
 > print(confusion_matrix_nn_class)
             Reales
 Predicciones   0   1
-           0 232  67
-           1  23  60
-> 
-> 
-> #Cálculo de la precisión (accuracy)
-> 
+           0 332 112
+           1  33  96
 > accuracy_nn_class <- sum(diag(confusion_matrix_nn_class))/sum(confusion_matrix_nn_class)
 > accuracy_nn_class
-[1] 0.7643979
+[1] 0.7469459
 > 
 
 
@@ -103,7 +92,7 @@ modelo tiene una acuracy global peor: .63, pero una capacidad mucho
 mayor para detectar riesgo de ideación suicida, como se observa en los
 resultados.
 
-
+#Gráfico 2
 
 > modelo_nn <- nnet(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8,
 +                   data = train_dataS,
@@ -112,72 +101,55 @@ resultados.
 +                   decay = 0.01,
 +                   maxit = 200)
 # weights:  36
-initial  value 1015.350033 
-iter  10 value 837.515233
-iter  20 value 831.333774
-iter  30 value 831.016248
-iter  40 value 830.757319
-iter  50 value 830.001555
-iter  60 value 828.728467
-iter  70 value 828.332291
-iter  80 value 828.045133
-iter  90 value 827.647255
-iter 100 value 827.492072
-iter 110 value 827.444859
-iter 120 value 827.421707
-iter 130 value 827.416586
-iter 140 value 827.415188
-iter 150 value 827.412890
-iter 160 value 827.408330
-iter 170 value 827.208064
-iter 180 value 827.068817
-iter 190 value 827.019599
-iter 200 value 827.002193
-final  value 827.002193 
-stopped after 200 iterations
-> 
-> 
+initial  value 890.745412 
+iter  10 value 739.780232
+iter  20 value 733.599772
+iter  30 value 730.727761
+iter  40 value 729.961558
+iter  50 value 728.936784
+iter  60 value 728.179562
+iter  70 value 727.797228
+iter  80 value 727.380941
+iter  90 value 726.540891
+iter 100 value 726.213743
+iter 110 value 726.024893
+iter 120 value 725.947557
+iter 130 value 725.904812
+iter 140 value 725.888209
+iter 150 value 725.884040
+iter 160 value 725.882066
+iter 170 value 725.881046
+final  value 725.881014 
+converged
 > summary(modelo_nn)
 a 5-5-1 network with 36 weights
 options were - entropy fitting  decay=0.01
  b->h1 i1->h1 i2->h1 i3->h1 i4->h1 i5->h1 
-  1.42  -1.32   2.60  -2.91  -0.65  -0.83 
+  0.34  -1.38  -1.89   0.36   3.16   3.02 
  b->h2 i1->h2 i2->h2 i3->h2 i4->h2 i5->h2 
- -1.79   2.72   1.51  -0.77  -2.45  -3.65 
+ -1.65   4.39   2.77  -2.56   0.72  -2.57 
  b->h3 i1->h3 i2->h3 i3->h3 i4->h3 i5->h3 
- -1.47   2.89   2.70   0.55   0.81   2.83 
+  1.52  -2.00  -2.75  -0.63  -2.02  -0.83 
  b->h4 i1->h4 i2->h4 i3->h4 i4->h4 i5->h4 
-  2.66  -2.60   2.36  -1.26   1.27  -1.63 
+  0.83  -0.89  -2.54   2.19   1.82  -0.59 
  b->h5 i1->h5 i2->h5 i3->h5 i4->h5 i5->h5 
- -0.34  -2.09  -0.71   2.28  -0.07   3.03 
+ -1.83   4.46   1.58  -1.72   3.02  -2.03 
  b->o h1->o h2->o h3->o h4->o h5->o 
--0.13 -3.61 -4.49  3.88  2.93 -3.04 
-> 
-> garson(modelo_nn) #GRAFICO2
-> 
+-2.84  3.29  4.98 -3.52  2.95 -3.81 
+> garson(modelo_nn)
 > #Predicciones
 > prob <- predict(modelo_nn, test_dataS, type = "raw")
-> 
 > nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .2, en lugar de .5.
-> 
 > pred_nn <- ifelse(prob > nuevo_umbral, 1, 0)
-> 
-> # Evaluación con matriz de confusión
-> 
 > confusion_matrix_nn <- table(Predicciones = pred_nn, Reales = test_dataS$Id_Suic)
-> 
 > print(confusion_matrix_nn)
             Reales
 Predicciones   0   1
-           0 146  29
-           1 109  98
-> 
-> 
-> #Cálculo de la precisión (accuracy)
-> 
+           0 208  43
+           1 157 165
 > accuracy_nn <- sum(diag(confusion_matrix_nn))/sum(confusion_matrix_nn)
 > accuracy_nn
-[1] 0.6387435
+[1] 0.6509599
 
 
 
@@ -200,6 +172,9 @@ puede ganar en especificidad. Se mantiene el .27 como umbral.
 
 A este respecto, modelos de machine learning a través de Random Forest
 pueden ser de mayor utilidad para VD de tipo dicotómico, como este caso: 
+
+#Gráfico 3
+
 > 
 > 
 > #Red neuronal (1 capa oculta con 5 neuronas, raw -> prob .2): Dimensiones + Salud Mental
@@ -210,75 +185,61 @@ pueden ser de mayor utilidad para VD de tipo dicotómico, como este caso:
 +                        linout = FALSE,
 +                        decay = 0.01,
 +                        maxit = 200)
-# weights:  66
-initial  value 1270.464789 
-iter  10 value 696.482222
-iter  20 value 679.070150
-iter  30 value 667.025617
-iter  40 value 652.434499
-iter  50 value 644.901099
-iter  60 value 643.622093
-iter  70 value 641.665386
-iter  80 value 639.022796
-iter  90 value 638.258672
-iter 100 value 637.964496
-iter 110 value 637.770829
-iter 120 value 637.746847
-final  value 637.745831 
-converged
-> 
-> 
+# weights:  86
+initial  value 878.656261 
+iter  10 value 599.722469
+iter  20 value 580.994867
+iter  30 value 563.009872
+iter  40 value 551.065475
+iter  50 value 544.791775
+iter  60 value 541.586933
+iter  70 value 540.015969
+iter  80 value 538.833861
+iter  90 value 537.195164
+iter 100 value 536.426915
+iter 110 value 536.200451
+iter 120 value 536.152158
+iter 130 value 536.132194
+iter 140 value 536.118896
+iter 150 value 536.099431
+iter 160 value 536.080945
+iter 170 value 536.071664
+iter 180 value 536.062559
+iter 190 value 535.977489
+iter 200 value 535.861107
+final  value 535.861107 
+stopped after 200 iterations
 > summary(modelo_nn_comS)
-a 11-5-1 network with 66 weights
+a 15-5-1 network with 86 weights
 options were - entropy fitting  decay=0.01
-  b->h1  i1->h1  i2->h1  i3->h1  i4->h1  i5->h1  i6->h1  i7->h1  i8->h1  i9->h1 i10->h1 
-  -1.52    1.84   -3.19   -0.67    4.06    3.32    4.18    1.46    1.09    0.72   -2.68 
-i11->h1 
-   6.20 
-  b->h2  i1->h2  i2->h2  i3->h2  i4->h2  i5->h2  i6->h2  i7->h2  i8->h2  i9->h2 i10->h2 
-   5.40   -6.06    4.45    2.78   -7.20    5.25    1.74   -3.63   -0.51    2.34   -4.12 
-i11->h2 
-   0.10 
-  b->h3  i1->h3  i2->h3  i3->h3  i4->h3  i5->h3  i6->h3  i7->h3  i8->h3  i9->h3 i10->h3 
-  -2.11    2.85   -2.69    1.15    0.82    1.87    1.01    0.79   -0.60    4.35    0.10 
-i11->h3 
-  -1.13 
-  b->h4  i1->h4  i2->h4  i3->h4  i4->h4  i5->h4  i6->h4  i7->h4  i8->h4  i9->h4 i10->h4 
-  -0.46    1.07   -0.55    0.34    6.62    3.54   -0.85   -2.65   -0.31    4.67    0.10 
-i11->h4 
-  -3.36 
-  b->h5  i1->h5  i2->h5  i3->h5  i4->h5  i5->h5  i6->h5  i7->h5  i8->h5  i9->h5 i10->h5 
-  -0.71    2.84   -2.46    2.06   -1.48    2.08    0.52    2.08    1.87    6.74   -0.19 
-i11->h5 
-  -2.08 
+  b->h1  i1->h1  i2->h1  i3->h1  i4->h1  i5->h1  i6->h1  i7->h1  i8->h1  i9->h1 i10->h1 i11->h1 i12->h1 i13->h1 i14->h1 i15->h1 
+  -0.59    3.57   -0.07   -0.11   -4.67   -1.54   -7.57   -2.87   -1.47   -1.92    7.42   -2.38   -0.36   -5.26    5.76   -8.65 
+  b->h2  i1->h2  i2->h2  i3->h2  i4->h2  i5->h2  i6->h2  i7->h2  i8->h2  i9->h2 i10->h2 i11->h2 i12->h2 i13->h2 i14->h2 i15->h2 
+   7.13   -1.73   -0.96   -5.37   -1.74   -2.63   -6.96   -2.39    1.16    5.42    0.91    8.32    0.11   -2.22   -4.77   -5.85 
+  b->h3  i1->h3  i2->h3  i3->h3  i4->h3  i5->h3  i6->h3  i7->h3  i8->h3  i9->h3 i10->h3 i11->h3 i12->h3 i13->h3 i14->h3 i15->h3 
+   6.93   -0.43    2.89    0.60    1.04    0.56   -3.78   -2.13   -1.05   -0.32    1.10    3.30   -0.07    2.60    1.52   -7.86 
+  b->h4  i1->h4  i2->h4  i3->h4  i4->h4  i5->h4  i6->h4  i7->h4  i8->h4  i9->h4 i10->h4 i11->h4 i12->h4 i13->h4 i14->h4 i15->h4 
+  -0.83    4.35    1.68    3.43   -5.92   -7.18   -2.10   -1.26    2.83   -0.69   -0.32   -0.31    1.03   -1.23   -2.38    1.78 
+  b->h5  i1->h5  i2->h5  i3->h5  i4->h5  i5->h5  i6->h5  i7->h5  i8->h5  i9->h5 i10->h5 i11->h5 i12->h5 i13->h5 i14->h5 i15->h5 
+  -2.39   -5.61   -1.97   -1.99    3.28    7.24    2.43    4.28    1.97    4.71   -1.59    0.06   -3.55    2.71    1.74    0.79 
  b->o h1->o h2->o h3->o h4->o h5->o 
--0.19  8.22 -7.32 -8.37  3.54  6.36 
-> 
-> garson(modelo_nn_comS) #GRAFICO3
-> 
+-0.89 -3.10 -1.89  9.28 -5.60 -6.03 
+> garson(modelo_nn_comS)
 > #Predicciones
 > prob_ComS <- predict(modelo_nn_comS, test_dataS, type = "raw")
-> 
 > nuevo_umbral <- 0.27 #Se ajusta la sensibilidad con un umbral .3, en lugar de .5.
-> 
 > pred_nn_comS <- ifelse(prob_ComS > nuevo_umbral, 1, 0)
-> 
-> # Evaluación con matriz de confusión
-> 
 > confusion_matrix_nn_comS <- table(Predicciones = pred_nn_comS, Reales = test_dataS$Id_Suic)
-> 
 > print(confusion_matrix_nn_comS)
             Reales
 Predicciones   0   1
-           0 183  21
-           1  72 106
-> 
-> 
-> #Cálculo de la precisión (accuracy)
-> 
+           0 269  49
+           1  96 159
 > accuracy_nn_comS <- sum(diag(confusion_matrix_nn_comS))/sum(confusion_matrix_nn_comS)
 > accuracy_nn_comS
-[1] 0.7565445
+[1] 0.7469459
+
+
 
 
 
@@ -295,81 +256,221 @@ mucho mayor, con una buena sensibilidad y buena especificidad. Este
 modelo es razonablemente adecuado para detectar casos de riesgo de
 ideación suicida.
 
-> 
+#GRáfico 4 y Gráfico 5
+
 > modelo_rf <- randomForest(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
-+                           data = Neuron_Balance, ntree = 500, importance = TRUE)
++                           data = train_dataS, ntree = 500, importance = TRUE)
 > print(modelo_rf)
 
 Call:
- randomForest(formula = Id_Suic ~ dim2 + dim5 + dim6 + dim7 +      dim8 + C26b + C22 + A2 + A1z, data = Neuron_Balance, ntree = 500,      importance = TRUE) 
+ randomForest(formula = Id_Suic ~ dim2 + dim5 + dim6 + dim7 +      dim8 + C26b + C22 + A2 + A1z, data = train_dataS, ntree = 500,      importance = TRUE) 
                Type of random forest: classification
                      Number of trees: 500
 No. of variables tried at each split: 3
 
-        OOB estimate of  error rate: 20.16%
+        OOB estimate of  error rate: 20.19%
 Confusion matrix:
-     0   1 class.error
-0 1035 156   0.1309824
-1  229 490   0.3184979
-> varImpPlot(modelo_rf) #GRAFICO4
-> 
-> 
-> probabilidades_rf <- predict(modelo_rf, Neuron_Balance, type = "prob")
-> 
+    0   1 class.error
+0 725 101   0.1222760
+1 169 342   0.3307241
+> varImpPlot(modelo_rf)
+> probabilidades_rf <- predict(modelo_rf, test_dataS, type = "prob")
 > umbral <- 0.27
-> 
 > predicciones_umbral <- ifelse(probabilidades_rf[, "1"] > umbral, "1", "0")
-> confusionMatrix(factor(predicciones_umbral), factor(Neuron_Balance$Id_Suic))
+> confusionMatrix(factor(predicciones_umbral), factor(test_dataS$Id_Suic))
 Confusion Matrix and Statistics
 
           Reference
-Prediction    0    1
-         0 1034  111
-         1  157  608
-                                         
-               Accuracy : 0.8597         
-                 95% CI : (0.8433, 0.875)
-    No Information Rate : 0.6236         
-    P-Value [Acc > NIR] : < 2.2e-16      
-                                         
-                  Kappa : 0.7049         
-                                         
- Mcnemar's Test P-Value : 0.005981       
-                                         
-            Sensitivity : 0.8682         
-            Specificity : 0.8456         
-         Pos Pred Value : 0.9031         
-         Neg Pred Value : 0.7948         
-             Prevalence : 0.6236         
-         Detection Rate : 0.5414         
-   Detection Prevalence : 0.5995         
-      Balanced Accuracy : 0.8569         
-                                         
-       'Positive' Class : 0              
-                                         
-> 
-> 
+Prediction   0   1
+         0 286  40
+         1  79 168
+                                          
+               Accuracy : 0.7923          
+                 95% CI : (0.7568, 0.8248)
+    No Information Rate : 0.637           
+    P-Value [Acc > NIR] : 5.176e-16       
+                                          
+                  Kappa : 0.5683          
+                                          
+ Mcnemar's Test P-Value : 0.000495        
+                                          
+            Sensitivity : 0.7836          
+            Specificity : 0.8077          
+         Pos Pred Value : 0.8773          
+         Neg Pred Value : 0.6802          
+             Prevalence : 0.6370          
+         Detection Rate : 0.4991          
+   Detection Prevalence : 0.5689          
+      Balanced Accuracy : 0.7956          
+                                          
+       'Positive' Class : 0               
+                                          
 > importance(modelo_rf)
-             0         1 MeanDecreaseAccuracy MeanDecreaseGini
-dim2 12.006273  2.515870            10.953214         17.84299
-dim5 18.486349 -2.496599            13.463765         21.53429
-dim6 15.298754  7.725720            17.918156         28.40528
-dim7 42.437181 24.411987            48.066832         65.37655
-dim8 22.433056 -2.533807            17.037162         27.23378
-C26b 54.753614 47.758304            68.906466        164.13480
-C22  42.482183 19.966984            45.487274        125.73865
-A2   -2.851706  4.590326             1.723405         18.00260
-A1z   4.249514 10.547919            10.746536        134.36385
+             0          1 MeanDecreaseAccuracy MeanDecreaseGini
+dim2 13.629944 -0.7883907             9.494752         13.80149
+dim5 20.950432 -1.4320871            16.401180         17.57492
+dim6 14.765482  4.9476884            15.520898         20.38908
+dim7 31.323351 14.5602698            34.101926         42.99677
+dim8 14.118632 -2.8678595             8.471334         19.64503
+C26b 50.971482 38.0271949            61.691201        116.48088
+C22  41.747574 18.3466116            46.207684         95.71754
+A2   -4.936099  9.0457298             3.434292         14.05886
+A1z   6.145288 11.2830183            12.298451        101.61060
 > varImpPlot(modelo_rf)
-> 
-> plot(varImp_modelo, main = "Importancia de las Variables en Random Forest") #GRAFICO5 
-> 
-> 
-> #Representación Gráfica arbol de ejemplo #GRAFICO6
-> 
+> plot(varImp_modelo, main = "Importancia de las Variables en Random Forest")
 > arbol_1 <- getTree(modelo_rf, k = 1, labelVar = TRUE)
-> 
 > arbol_rpart <- rpart(Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
 +                      data = Neuron_Balance, method = "class", control = rpart.control(cp = 0))
-> 
-> rpart.plot(arbol_rpart, main = "Árbol 1 de Random Forest")
+> rpart.plot(arbol_rpart, 
++            main = "Árbol 1 de Random Forest",   # Título del gráfico
++            cex.main = 1.5,                        # Tamaño del título
++            cex = .75)                           # Tamaño de las etiquetas de los nodos
+
+
+
+
+###3.1 RANDOM FOREST OPTIMIZADO
+Se optimiza el random forest como mtyr para mejorar aún más el ajuste, acercándose a una precisión del 80%. 
+
+#Gráfico 6 y Gráfico 7 y Gráfico 8
+
+> ##Control de entrenamiento
+> control <- trainControl(method = "cv", number = 5)
+> # Definir grilla de parámetros
+> tunegrid <- expand.grid(
++   .mtry = c(2, 4, 6, 8, 10)  # probar varios valores de mtry
++ )
+> # Ajustar el modelo
+> set.seed(123)  # Semilla para reproducibilidad
+> modelo_rf_opt <- train(
++   Id_Suic ~ dim2 + dim5 + dim6 + dim7 + dim8 + C26b + C22 + A2 + A1z, 
++   data = train_dataS,
++   method = "rf",
++   metric = "Accuracy",
++   tuneGrid = tunegrid,
++   trControl = control,
++   ntree = 500
++ )
+> print(modelo_rf_opt)
+Random Forest 
+
+1337 samples
+   9 predictor
+   2 classes: '0', '1' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 1070, 1070, 1069, 1070, 1069 
+Resampling results across tuning parameters:
+
+  mtry  Accuracy   Kappa    
+   2    0.7935687  0.5500787
+   4    0.7973000  0.5604893
+   6    0.7987926  0.5646226
+   8    0.7920650  0.5506396
+  10    0.7793672  0.5260964
+
+Accuracy was used to select the optimal model using the largest value.
+The final value used for the model was mtry = 6.
+> plot(modelo_rf_opt)
+> probabilidades_rf_opt <- predict(modelo_rf_opt, test_dataS, type = "prob")
+> umbral <- 0.27
+> predicciones_umbral_opt <- ifelse(probabilidades_rf_opt[, "1"] > umbral, "1", "0")
+> confusionMatrix(factor(predicciones_umbral_opt), factor(test_dataS$Id_Suic))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0 278  39
+         1  87 169
+                                          
+               Accuracy : 0.7801          
+                 95% CI : (0.7439, 0.8134)
+    No Information Rate : 0.637           
+    P-Value [Acc > NIR] : 9.606e-14       
+                                          
+                  Kappa : 0.547           
+                                          
+ Mcnemar's Test P-Value : 2.826e-05       
+                                          
+            Sensitivity : 0.7616          
+            Specificity : 0.8125          
+         Pos Pred Value : 0.8770          
+         Neg Pred Value : 0.6602          
+             Prevalence : 0.6370          
+         Detection Rate : 0.4852          
+   Detection Prevalence : 0.5532          
+      Balanced Accuracy : 0.7871          
+                                          
+       'Positive' Class : 0               
+                                          
+> varImp_modelo <- varImp(modelo_rf_opt, scale = FALSE)
+> plot(varImp_modelo, main = "Importancia de las Variables en Random Forest Optimizado")
+> arbol_2 <- getTree(modelo_rf_opt, k = 1, labelVar = TRUE)
+Error en getTree(modelo_rf_opt, k = 1, labelVar = TRUE): 
+  No forest component in modelo_rf_opt
+> arbol_1 <- getTree(modelo_rf_opt, k = 1, labelVar = TRUE)
+Error en getTree(modelo_rf_opt, k = 1, labelVar = TRUE): 
+  No forest component in modelo_rf_opt
+
+
+
+
+
+Interpretación GPT
+
+
+
+¡Perfecto! Ahora sí, con tu Matriz de Confusión y Estadísticas, puedo hacer una interpretación completa de tu modelo Random Forest. Vamos paso a paso:
+
+📊 Análisis de la matriz de confusión
+
+Real 0	Real 1
+Predicho 0	278	39
+Predicho 1	87	169
+278 casos correctamente predichos como 0 (verdaderos negativos).
+
+169 casos correctamente predichos como 1 (verdaderos positivos).
+
+87 falsos positivos (predijiste 1 pero era 0).
+
+39 falsos negativos (predijiste 0 pero era 1).
+
+📈 Indicadores principales
+
+Métrica	Interpretación	Valor
+Accuracy	Exactitud global del modelo	78%
+Kappa	Medida de acuerdo ajustada (cuánto mejor que al azar)	0.547 (moderado)
+Sensitivity (Recall)	% de verdaderos positivos correctamente detectados (detecta los "1")	76.16%
+Specificity	% de verdaderos negativos correctamente detectados (detecta los "0")	81.25%
+Pos Pred Value (Precision)	Cuando predices "1", ¿cuántas veces aciertas?	87.7%
+Neg Pred Value	Cuando predices "0", ¿cuántas veces aciertas?	66.02%
+Balanced Accuracy	Promedio de Sensitivity y Specificity	78.71%
+P-Value [Acc > NIR]	¿La precisión es significativamente mejor que predecir la clase mayoritaria?	Muy significativo (p < 0.001)
+🔎 Interpretación detallada
+Tu modelo es significativamente mejor que simplemente predecir la clase mayoritaria (p < 0.001).
+
+La exactitud general es buena (78%), aunque no espectacular.
+
+Kappa = 0.547, que según estándares habituales significa un acuerdo moderado (de 0.41 a 0.60 es moderado).
+
+Sensitivity (76%) y Specificity (81%) son bastante equilibradas — eso es positivo: el modelo no está desbalanceado hacia una sola clase.
+
+El modelo predice bien la clase positiva (1): cuando predice que alguien está en riesgo, tiene un 87% de precisión (lo cual es muy bueno).
+
+Problema menor: el valor predictivo negativo (NPV) es más bajo (66%), lo que indica que cuando dice "no riesgo" (0), se equivoca más veces.
+
+⚡ Aspectos a destacar
+El umbral 0.20 parece adecuado para priorizar la detección de positivos (riesgo de suicidio), lo cual tiene sentido en un problema sensible: prefieres equivocarte de más (falsos positivos) que perder un caso real (falso negativo).
+
+El número de falsos negativos (39) es bastante controlado para un problema que normalmente es difícil.
+
+🎯 Conclusión general
+Tu modelo Random Forest optimizado tiene un desempeño bastante sólido y balanceado para predecir riesgo (Id_Suic).
+Está especialmente bien calibrado para:
+
+Detectar correctamente a personas en riesgo.
+
+Minimizar errores graves (falsos negativos) dentro de lo razonable.
+
+Podrías mejorar aún más si quieres afinando el umbral o usando técnicas de calibración, pero ya es un modelo que puedes usar para interpretación y toma de decisiones preliminares.
