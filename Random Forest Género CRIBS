@@ -1,0 +1,179 @@
+                                      
+
+###PREPARACIÓN DE DATOS
+
+library(foreign)
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(nnet)
+library(readxl)
+library(NeuralNetTools)
+library(randomForest)
+library(caret)
+library(rpart.plot)
+library(pROC)
+library(rmarkdown)
+library(writexl)
+library(xgboost)
+library(pROC)
+library(caret)
+
+
+##Abrir data frame Excel
+##Explorar ruta archivo
+
+file.choose()
+
+
+
+##Abrir un Excel (Foessa balanceado de suicidio)
+
+
+setwd('C:\\Users\\llosa\\Desktop\\CATEDRA CRIBS MAYO 2025\\FOESSA ESPAÑA\\Análisis domingo\\')
+
+
+BBDD <-read.csv("Jamovi.csv", sep = ";")
+
+BBDD$RM_Actual[BBDD$RM_Actual == 99] <- NA
+
+#FACTORES
+
+BBDD$Condiciones <- as.factor(BBDD$Condiciones)
+BBDD$z.des.larga <- as.factor(BBDD$z.des.larga)
+BBDD$z.des.muy_lar <- as.factor(BBDD$z.des.muy_lar)
+BBDD$dim1 <- as.factor(BBDD$dim1)
+BBDD$dim4 <- as.factor(BBDD$dim4)
+BBDD$dim5 <- as.factor(BBDD$dim5)
+BBDD$dim6 <- as.factor(BBDD$dim6)
+BBDD$RM_Actual <- as.factor(BBDD$RM_Actual)
+BBDD$Sustentador <- as.factor(BBDD$Sustentador)
+BBDD$Nucleos_cont <- as.factor(BBDD$Nucleos_cont)
+
+#NAs
+
+colSums(is.na(BBDD[c("RM_Actual", "z.des.larga", "z.des.muy_lar", "dim1", "dim4", "dim5", "dim6", "Sustentador", "Nucleos_cont" )]))
+
+
+
+BBDDna <- BBDD %>%
+  filter(!is.na(z.des.larga) & !is.na(z.des.muy_lar) & !is.na(RM_Actual))
+
+
+colSums(is.na(BBDDna[c("RM_Actual", "z.des.larga", "z.des.muy_lar", "dim1", "dim4", "dim5", "dim6", "Sustentador", "Nucleos_cont" )]))
+
+str(BBDDna$RM_Actual)
+summary(BBDDna$RM_Actual)
+
+colSums(is.na(BBDDna[c("RM_Actual", "z.des.larga", "z.des.muy_lar", "dim1", "dim4", "dim5", "dim6", "Sustentador", "Nucleos_cont" )]))
+
+
+RM_Actual ~  z.des.larga + z.des.muy_lar + dim1 + dim4 + dim5 +
+                dim6 + Sustentador + Nucleos_cont 
+
+
+
+sapply(BBDDna$RM_Actual, class)
+length(unique(BBDD$RM_Actual))
+
+# 2. Divide en conjunto de entrenamiento y prueba
+set.seed(123)
+trainIndex <- createDataPartition(BBDDna$RM_Actual, p = 0.7, list = FALSE)
+train <- BBDDna[trainIndex, ]
+test <- BBDDna[-trainIndex, ]
+
+
+
+
+
+
+    
+> # RANDOM FOREST Predicción del efecto del género
+> efecto_genero <- predict(modelo_log, newdata = test, type = "response")
+> # Predicciones
+> predicciones <- predict(modelo_rf, newdata = test)
+> # Predicción final ajustada = efecto del género + residuo estimado
+> prediccion_final <- efecto_genero + predicciones
+> # (opcional) Limitar entre 0 y 1
+> prediccion_final <- pmin(pmax(prediccion_final, 0), 1)
+> # Clasificación final usando umbral .5
+> pred_clase <- ifelse(prediccion_final > 0.5, 1, 0)
+> table(Predicho = pred_clase, Real = test$RM_Actual)
+        Real
+Predicho   0   1
+       0 700  72
+       1  23  36
+> confusionMatrix(as.factor(pred_clase), as.factor(test$RM_Actual), positive = "1")
+Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0 700  72
+         1  23  36
+                                          
+               Accuracy : 0.8857          
+                 95% CI : (0.8621, 0.9065)
+    No Information Rate : 0.87            
+    P-Value [Acc > NIR] : 0.09702         
+                                          
+                  Kappa : 0.3736          
+                                          
+ Mcnemar's Test P-Value : 8.449e-07       
+                                          
+            Sensitivity : 0.33333         
+            Specificity : 0.96819         
+         Pos Pred Value : 0.61017         
+         Neg Pred Value : 0.90674         
+             Prevalence : 0.12996         
+         Detection Rate : 0.04332         
+   Detection Prevalence : 0.07100         
+      Balanced Accuracy : 0.65076         
+                                          
+       'Positive' Class : 1               
+                                          
+> roc_obj <- roc(response = test$RM_Actual, predictor = prediccion_final)
+Setting levels: control = 0, case = 1
+Setting direction: controls < cases
+> plot(roc_obj, print.thres = TRUE, print.auc = TRUE, col = "blue")
+> coords(roc_obj, x = "best", best.method = "closest.topleft", ret = c("threshold", "sensitivity", "specificity"))
+  threshold sensitivity specificity
+1 0.1153313   0.8055556   0.7952974
+> # Clasificación final ajustando el umbral con la Curva Roc a .12
+> pred_clase <- ifelse(prediccion_final > 0.12, 1, 0)
+> table(Predicho = pred_clase, Real = test$RM_Actual)
+        Real
+Predicho   0   1
+       0 577  22
+       1 146  86
+> confusionMatrix(as.factor(pred_clase), as.factor(test$RM_Actual), positive = "1")
+Confusion Matrix and Statistics
+
+          Reference
+Prediction   0   1
+         0 577  22
+         1 146  86
+                                          
+               Accuracy : 0.7978          
+                 95% CI : (0.7689, 0.8246)
+    No Information Rate : 0.87            
+    P-Value [Acc > NIR] : 1               
+                                          
+                  Kappa : 0.3993          
+                                          
+ Mcnemar's Test P-Value : <2e-16          
+                                          
+            Sensitivity : 0.7963          
+            Specificity : 0.7981          
+         Pos Pred Value : 0.3707          
+         Neg Pred Value : 0.9633          
+             Prevalence : 0.1300          
+         Detection Rate : 0.1035          
+   Detection Prevalence : 0.2792          
+      Balanced Accuracy : 0.7972          
+                                          
+       'Positive' Class : 1               
+                                          
+
+
+> 
+
